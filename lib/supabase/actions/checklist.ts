@@ -41,6 +41,10 @@ export async function createChecklistItem(formData: FormData): Promise<void> {
 
 export async function deleteChecklistItem(id: string): Promise<void> {
   const supabase = await createClient()
-  await supabase.from('checklist_items').delete().eq('id', id)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('checklist_items').delete().eq('id', id).eq('user_id', user.id)
   revalidatePath('/checklist')
 }

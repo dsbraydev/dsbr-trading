@@ -4,6 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { TradeRow, TradeDetail, CreateTradeInput } from '@/types/database'
 
+function extractStoragePath(publicUrl: string): string | null {
+  const marker = '/trade-images/'
+  const idx = publicUrl.indexOf(marker)
+  return idx !== -1 ? publicUrl.slice(idx + marker.length) : null
+}
+
 export async function getTrades(): Promise<TradeRow[]> {
   const supabase = await createClient()
   const { data } = await supabase
@@ -107,6 +113,13 @@ export async function updateTrade(id: string, input: CreateTradeInput) {
     return { error: 'Select at least one account or link to a challenge' }
   }
 
+  const { data: existing } = await supabase
+    .from('trades')
+    .select('image_url')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single()
+
   const amount = input.win ? Math.abs(input.amount) : -Math.abs(input.amount)
 
   const { error: tradeError } = await supabase
@@ -124,6 +137,11 @@ export async function updateTrade(id: string, input: CreateTradeInput) {
     .eq('user_id', user.id)
 
   if (tradeError) return { error: tradeError.message }
+
+  if (existing?.image_url && existing.image_url !== input.imageUrl) {
+    const path = extractStoragePath(existing.image_url)
+    if (path) await supabase.storage.from('trade-images').remove([path])
+  }
 
   await supabase.from('trade_accounts').delete().eq('trade_id', id)
   if (input.accountIds.length > 0) {
@@ -146,8 +164,26 @@ export async function updateTrade(id: string, input: CreateTradeInput) {
 
 export async function deleteTrade(id: string) {
   const supabase = await createClient()
-  const { error } = await supabase.from('trades').delete().eq('id', id)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: trade } = await supabase
+    .from('trades')
+    .select('image_url')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single()
+
+  const { error } = await supabase.from('trades').delete().eq('id', id).eq('user_id', user.id)
   if (error) return { error: error.message }
+
+  if (trade?.image_url) {
+    const path = extractStoragePath(trade.image_url)
+    if (path) await supabase.storage.from('trade-images').remove([path])
+  }
+
   revalidatePath('/trades')
   return { success: true }
 }

@@ -72,9 +72,9 @@ export default async function TradesPage() {
 
                 <span className="text-sm text-muted-foreground flex-1 truncate">{typeLabel}</span>
 
-                {totalItems > 0 && (
+                {(totalItems > 0 || checkedCount > 0) && (
                   <span className="text-xs text-muted-foreground shrink-0 tabular-nums">
-                    {checkedCount}/{totalItems}
+                    {checkedCount}/{Math.max(checkedCount, totalItems)}
                   </span>
                 )}
               </Link>

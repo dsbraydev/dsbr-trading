@@ -44,7 +44,11 @@ export async function createChallenge(formData: FormData): Promise<void> {
 
 export async function cancelChallenge(id: string): Promise<void> {
   const supabase = await createClient()
-  await supabase.from('challenges').delete().eq('id', id)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('challenges').delete().eq('id', id).eq('user_id', user.id)
   revalidatePath('/challenge')
   revalidatePath('/trades')
 }

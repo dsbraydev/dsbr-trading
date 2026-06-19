@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { createTrade, updateTrade } from '@/lib/supabase/actions/trades'
@@ -69,9 +69,23 @@ export function TradeForm({ accounts, checklistItems, activeChallenge, tradeId, 
     setCheckedItems((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
   }
 
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview)
+    }
+  }, [imagePreview])
+
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setError('File must be an image.')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Image must be under 10 MB.')
+      return
+    }
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
     setExistingImageUrl(null)

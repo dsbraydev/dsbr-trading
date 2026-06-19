@@ -51,22 +51,31 @@ export async function createAccount(formData: FormData): Promise<void> {
 
 export async function updateAccount(id: string, formData: FormData): Promise<void> {
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
   const name = (formData.get('name') as string)?.trim()
   const startingBalance = parseFloat(formData.get('starting_balance') as string)
   if (!name || isNaN(startingBalance)) return
-  await supabase.from('accounts').update({ name, starting_balance: startingBalance }).eq('id', id)
+  await supabase
+    .from('accounts')
+    .update({ name, starting_balance: startingBalance })
+    .eq('id', id)
+    .eq('user_id', user.id)
   revalidatePath('/accounts')
 }
 
 export async function deleteAccount(id: string): Promise<void> {
   const supabase = await createClient()
-
-  await supabase.from('accounts').delete().eq('id', id)
-
-  // Clean up stray trades: prop trades that now have no accounts linked
   const {
     data: { user },
   } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase.from('accounts').delete().eq('id', id).eq('user_id', user.id)
+
+  // Clean up stray trades: prop trades that now have no accounts linked
   if (user) {
     const { data: propTrades } = await supabase
       .from('trades')
