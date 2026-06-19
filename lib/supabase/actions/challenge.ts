@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ChallengeWithTrades } from '@/types/database'
+import { CHALLENGE_START_BALANCE } from '@/lib/challenge-levels'
 
 export async function getActiveChallenge(): Promise<ChallengeWithTrades | null> {
   const supabase = await createClient()
@@ -18,15 +19,12 @@ export async function getActiveChallenge(): Promise<ChallengeWithTrades | null> 
   return (data as ChallengeWithTrades | null) ?? null
 }
 
-export async function createChallenge(formData: FormData): Promise<void> {
+export async function createChallenge(): Promise<void> {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return
-
-  const startingBalance = parseFloat(formData.get('starting_balance') as string)
-  if (isNaN(startingBalance) || startingBalance <= 0) return
 
   const { data: existing } = await supabase
     .from('challenges')
@@ -37,7 +35,7 @@ export async function createChallenge(formData: FormData): Promise<void> {
 
   if (existing) return
 
-  await supabase.from('challenges').insert({ starting_balance: startingBalance, user_id: user.id })
+  await supabase.from('challenges').insert({ starting_balance: CHALLENGE_START_BALANCE, user_id: user.id })
 
   revalidatePath('/challenge')
 }

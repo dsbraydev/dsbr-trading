@@ -22,6 +22,7 @@ export async function getTrades(): Promise<TradeRow[]> {
       ),
       checked_items:trade_checklist_items(checklist_item_id)
     `)
+    .is('challenge_id', null)
     .order('traded_at', { ascending: false })
 
   return (data ?? []) as TradeRow[]
