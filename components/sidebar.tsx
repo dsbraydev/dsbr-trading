@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { TrendingUp, Building2, Trophy, CheckSquare, LogOut } from 'lucide-react'
+import { LayoutDashboard, TrendingUp, Building2, Trophy, CheckSquare, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { signOut } from '@/app/actions'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/trades', label: 'Trades', icon: TrendingUp },
   { href: '/accounts', label: 'Accounts', icon: Building2 },
   { href: '/challenge', label: 'Challenge', icon: Trophy },
