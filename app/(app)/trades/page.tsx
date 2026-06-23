@@ -2,14 +2,17 @@ import { getTrades } from '@/lib/supabase/actions/trades'
 import { getChecklistItems } from '@/lib/supabase/actions/checklist'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { TradeCard } from './trade-card'
 
-function formatAmount(n: number) {
-  return `${n >= 0 ? '+' : ''}$${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-}
+export default async function TradesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>
+}) {
+  const { filter } = await searchParams
+  const type = filter === 'challenge' ? 'challenge' : 'normal'
 
-export default async function TradesPage() {
-  const [trades, checklistItems] = await Promise.all([getTrades(), getChecklistItems()])
-  const totalItems = checklistItems.length
+  const [trades, checklistItems] = await Promise.all([getTrades(type), getChecklistItems()])
 
   return (
     <div className="p-6">
@@ -17,6 +20,29 @@ export default async function TradesPage() {
         <h1 className="text-lg font-semibold">Trades</h1>
         <Link href="/trades/new">
           <Button size="sm">+ New trade</Button>
+        </Link>
+      </div>
+
+      <div className="flex gap-2 mb-5">
+        <Link
+          href="/trades"
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            type === 'normal'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Normal
+        </Link>
+        <Link
+          href="/trades?filter=challenge"
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            type === 'challenge'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Challenge
         </Link>
       </div>
 
@@ -28,58 +54,14 @@ export default async function TradesPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-1.5">
-          {trades.map((trade) => {
-            const accountNames = trade.accounts
-              .map((a) => a.account?.name)
-              .filter(Boolean)
-              .join(', ')
-            const typeLabel = trade.challenge_id ? 'Challenge' : accountNames || '—'
-            const checkedCount = trade.checked_items.length
-
-            return (
-              <Link
-                key={trade.id}
-                href={`/trades/${trade.id}`}
-                className="flex items-center gap-4 px-4 py-3 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors"
-              >
-                <span className="text-xs text-muted-foreground w-14 shrink-0">
-                  {new Date(trade.traded_at).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </span>
-
-                <span className="text-sm font-medium w-16 shrink-0">{trade.currency}</span>
-
-                <span
-                  className={`text-xs px-1.5 py-0.5 rounded-md font-medium shrink-0 ${
-                    trade.win
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                      : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-destructive'
-                  }`}
-                >
-                  {trade.win ? 'Win' : 'Loss'}
-                </span>
-
-                <span
-                  className={`text-sm font-medium tabular-nums w-24 shrink-0 ${
-                    trade.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'
-                  }`}
-                >
-                  {formatAmount(trade.amount)}
-                </span>
-
-                <span className="text-sm text-muted-foreground flex-1 truncate">{typeLabel}</span>
-
-                {(totalItems > 0 || checkedCount > 0) && (
-                  <span className="text-xs text-muted-foreground shrink-0 tabular-nums">
-                    {checkedCount}/{Math.max(checkedCount, totalItems)}
-                  </span>
-                )}
-              </Link>
-            )
-          })}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+          {trades.map((trade) => (
+            <TradeCard
+              key={trade.id}
+              trade={trade}
+              totalChecklistItems={checklistItems.length}
+            />
+          ))}
         </div>
       )}
     </div>

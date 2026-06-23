@@ -10,9 +10,9 @@ function extractStoragePath(publicUrl: string): string | null {
   return idx !== -1 ? publicUrl.slice(idx + marker.length) : null
 }
 
-export async function getTrades(): Promise<TradeRow[]> {
+export async function getTrades(type: 'normal' | 'challenge' = 'normal', limit?: number): Promise<TradeRow[]> {
   const supabase = await createClient()
-  const { data } = await supabase
+  let query = supabase
     .from('trades')
     .select(`
       *,
@@ -22,9 +22,14 @@ export async function getTrades(): Promise<TradeRow[]> {
       ),
       checked_items:trade_checklist_items(checklist_item_id)
     `)
-    .is('challenge_id', null)
-    .order('traded_at', { ascending: false })
 
+  query = type === 'challenge'
+    ? query.not('challenge_id', 'is', null)
+    : query.is('challenge_id', null)
+
+  if (limit) query = query.limit(limit)
+
+  const { data } = await query.order('traded_at', { ascending: false })
   return (data ?? []) as TradeRow[]
 }
 

@@ -1,6 +1,6 @@
 import { signIn } from './actions'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SubmitButton } from './submit-button'
 
 export default async function LoginPage({
   searchParams,
@@ -16,7 +16,7 @@ export default async function LoginPage({
         {error && <p className="text-sm text-destructive">{error}</p>}
         <Input name="email" type="email" placeholder="Email" required />
         <Input name="password" type="password" placeholder="Password" required />
-        <Button type="submit">Sign in</Button>
+        <SubmitButton />
       </form>
     </div>
   )
