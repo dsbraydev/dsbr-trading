@@ -36,18 +36,19 @@ interface Props {
   activeChallenge: { id: string; starting_balance: number } | null
   tradeId?: string
   initialValues?: TradeInitialValues
+  defaultType?: TradeType
 }
 
 type Currency = 'NAS100' | 'Gold'
 type TradeType = 'prop' | 'challenge'
 
-export function TradeForm({ accounts, checklistItems, activeChallenge, tradeId, initialValues }: Props) {
+export function TradeForm({ accounts, checklistItems, activeChallenge, tradeId, initialValues, defaultType }: Props) {
   const router = useRouter()
   const isEdit = !!tradeId
 
   const [currency, setCurrency] = useState<Currency>(initialValues?.currency ?? 'NAS100')
   const [win, setWin] = useState(initialValues?.win ?? true)
-  const [type, setType] = useState<TradeType>(initialValues?.type ?? 'prop')
+  const [type, setType] = useState<TradeType>(initialValues?.type ?? defaultType ?? 'prop')
   const [amount, setAmount] = useState(initialValues ? String(initialValues.amount) : '')
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>(initialValues?.accountIds ?? [])
   const [checkedItems, setCheckedItems] = useState<string[]>(initialValues?.checkedItemIds ?? [])

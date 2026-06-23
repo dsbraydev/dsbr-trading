@@ -2,6 +2,7 @@ import { getActiveChallenge, createChallenge, cancelChallenge } from '@/lib/supa
 import { Button } from '@/components/ui/button'
 import { CancelChallengeButton } from './cancel-button'
 import { CHALLENGE_LEVELS, CHALLENGE_COMPLETE_BALANCE, CHALLENGE_START_BALANCE, getLevelForBalance } from '@/lib/challenge-levels'
+import Link from 'next/link'
 
 function fmt(n: number) {
   return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -48,7 +49,15 @@ export default async function ChallengePage() {
           <h1 className="text-lg font-semibold">Active Challenge</h1>
           <p className="text-sm text-muted-foreground">30-Level Compounding Challenge</p>
         </div>
-        <CancelChallengeButton challengeId={challenge.id} cancelAction={cancelChallenge} />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/trades/new?type=challenge&from=challenge"
+            className="inline-flex items-center h-8 px-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            + Log Trade
+          </Link>
+          <CancelChallengeButton challengeId={challenge.id} cancelAction={cancelChallenge} />
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-6">
@@ -130,38 +139,43 @@ export default async function ChallengePage() {
           <h2 className="text-sm font-medium mb-2">Trades</h2>
           {sortedTrades.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No trades yet. Log a trade and assign it to this challenge.
+              No trades yet.{' '}
+              <Link href="/trades/new?type=challenge&from=challenge" className="underline hover:text-foreground transition-colors">
+                Log one now.
+              </Link>
             </p>
           ) : (
             <ul className="space-y-1.5">
               {sortedTrades.map((trade) => (
-                <li
-                  key={trade.id}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border bg-card text-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(trade.traded_at).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </span>
-                    <span className="font-medium">{trade.currency}</span>
-                    <span
-                      className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${
-                        trade.win
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                          : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-destructive'
-                      }`}
-                    >
-                      {trade.win ? 'Win' : 'Loss'}
-                    </span>
-                  </div>
-                  <span
-                    className={`font-medium tabular-nums ${trade.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}
+                <li key={trade.id}>
+                  <Link
+                    href={`/trades/${trade.id}`}
+                    className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border bg-card text-sm hover:bg-muted/50 transition-colors"
                   >
-                    {fmtSigned(trade.amount)}
-                  </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(trade.traded_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                      <span className="font-medium">{trade.currency}</span>
+                      <span
+                        className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${
+                          trade.win
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-destructive'
+                        }`}
+                      >
+                        {trade.win ? 'Win' : 'Loss'}
+                      </span>
+                    </div>
+                    <span
+                      className={`font-medium tabular-nums ${trade.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}
+                    >
+                      {fmtSigned(trade.amount)}
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>
