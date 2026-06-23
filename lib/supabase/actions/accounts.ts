@@ -66,6 +66,39 @@ export async function updateAccount(id: string, formData: FormData): Promise<voi
   revalidatePath('/accounts')
 }
 
+export async function getAccountWithTrades(id: string) {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('accounts')
+    .select(`
+      *,
+      trade_accounts(
+        trade:trades(id, amount, win, currency, traded_at)
+      )
+    `)
+    .eq('id', id)
+    .single()
+
+  if (!data) return null
+
+  const trades = (data.trade_accounts as Array<{ trade: { id: string; amount: number; win: boolean; currency: string; traded_at: string } | null }>)
+    .map((ta) => ta.trade)
+    .filter((t): t is { id: string; amount: number; win: boolean; currency: string; traded_at: string } => t !== null)
+    .sort((a, b) => new Date(a.traded_at).getTime() - new Date(b.traded_at).getTime())
+
+  const pnl = trades.reduce((sum, t) => sum + t.amount, 0)
+
+  return {
+    id: data.id as string,
+    user_id: data.user_id as string,
+    name: data.name as string,
+    starting_balance: data.starting_balance as number,
+    created_at: data.created_at as string,
+    pnl,
+    trades,
+  }
+}
+
 export async function deleteAccount(id: string): Promise<void> {
   const supabase = await createClient()
   const {

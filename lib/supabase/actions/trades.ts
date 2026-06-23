@@ -102,6 +102,7 @@ export async function createTrade(input: CreateTradeInput) {
   }
 
   revalidatePath('/trades')
+  revalidatePath('/accounts')
   return { success: true, tradeId: trade.id }
 }
 
@@ -165,6 +166,7 @@ export async function updateTrade(id: string, input: CreateTradeInput) {
 
   revalidatePath('/trades')
   revalidatePath(`/trades/${id}`)
+  revalidatePath('/accounts')
   return { success: true, tradeId: id }
 }
 
@@ -191,5 +193,6 @@ export async function deleteTrade(id: string) {
   }
 
   revalidatePath('/trades')
+  revalidatePath('/accounts')
   return { success: true }
 }

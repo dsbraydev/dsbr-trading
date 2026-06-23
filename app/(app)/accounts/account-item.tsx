@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Pencil, Trash2, Check, X } from 'lucide-react'
@@ -34,14 +35,14 @@ export function AccountItem({ account, updateAction, deleteAction }: Props) {
   if (!editing) {
     return (
       <li className="flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-card">
-        <div>
+        <Link href={`/accounts/${account.id}`} className="flex-1 min-w-0 hover:opacity-80 transition-opacity">
           <p className="text-sm font-medium">{account.name}</p>
           <p className="text-xs text-muted-foreground mt-0.5">
             Start: ${account.starting_balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             {' · '}
             Balance: ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </p>
-        </div>
+        </Link>
         <div className="flex items-center gap-3">
           <span
             className={`text-sm font-medium tabular-nums ${account.pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}
