@@ -74,9 +74,10 @@ export function AccountsChart({ accounts }: Props) {
           <LabelList
             dataKey="pnl"
             position="top"
-            formatter={(v: number) =>
-              v >= 0 ? `+$${Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0)}` : `-$${Math.abs(v) >= 1000 ? `${(Math.abs(v) / 1000).toFixed(1)}k` : Math.abs(v).toFixed(0)}`
-            }
+            formatter={(v: unknown) => {
+              const n = typeof v === 'number' ? v : 0
+              return n >= 0 ? `+$${Math.abs(n) >= 1000 ? `${(n / 1000).toFixed(1)}k` : n.toFixed(0)}` : `-$${Math.abs(n) >= 1000 ? `${(Math.abs(n) / 1000).toFixed(1)}k` : Math.abs(n).toFixed(0)}`
+            }}
             style={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
           />
           {data.map((entry, i) => (
