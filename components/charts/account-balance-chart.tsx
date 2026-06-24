@@ -58,7 +58,7 @@ export function AccountBalanceChart({ dataPoints, profit }: Props) {
         />
         <Tooltip
           labelFormatter={(_, payload) => {
-            const point = (payload as { payload?: DataPoint }[] | undefined)?.[0]?.payload
+            const point = (payload as unknown as { payload?: DataPoint }[] | undefined)?.[0]?.payload
             return point?.date ?? ''
           }}
           formatter={(value) => {
