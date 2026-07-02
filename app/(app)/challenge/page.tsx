@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { CancelChallengeButton } from './cancel-button'
 import { CHALLENGE_LEVELS, CHALLENGE_COMPLETE_BALANCE, CHALLENGE_START_BALANCE, getLevelForBalance } from '@/lib/challenge-levels'
 import { TradeCard } from '../trades/trade-card'
+import { ZarTooltip } from '@/components/zar-tooltip'
 import Link from 'next/link'
 
 function fmt(n: number) {
@@ -124,10 +125,10 @@ export default async function ChallengePage() {
                         {isCurrentLevel ? '▶ ' : ''}{lvl.level}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">${fmt(lvl.startBalance)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-destructive">${fmt(lvl.risk)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-green-600 dark:text-green-400">${fmt(lvl.reward)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums font-medium">${fmt(lvl.endBalance)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground"><ZarTooltip usd={lvl.startBalance}>${fmt(lvl.startBalance)}</ZarTooltip></td>
+                    <td className="px-3 py-2 text-right tabular-nums text-destructive"><ZarTooltip usd={lvl.risk}>${fmt(lvl.risk)}</ZarTooltip></td>
+                    <td className="px-3 py-2 text-right tabular-nums text-green-600 dark:text-green-400"><ZarTooltip usd={lvl.reward}>${fmt(lvl.reward)}</ZarTooltip></td>
+                    <td className="px-3 py-2 text-right tabular-nums font-medium"><ZarTooltip usd={lvl.endBalance}>${fmt(lvl.endBalance)}</ZarTooltip></td>
                   </tr>
                 )
               })}

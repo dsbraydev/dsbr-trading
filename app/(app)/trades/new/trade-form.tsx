@@ -19,7 +19,7 @@ interface AccountOption {
 }
 
 export interface TradeInitialValues {
-  currency: 'NAS100' | 'Gold'
+  currency: 'NAS100' | 'Gold' | 'US30'
   win: boolean
   amount: number
   type: 'prop' | 'challenge'
@@ -39,7 +39,7 @@ interface Props {
   defaultType?: TradeType
 }
 
-type Currency = 'NAS100' | 'Gold'
+type Currency = 'NAS100' | 'Gold' | 'US30'
 type TradeType = 'prop' | 'challenge'
 
 export function TradeForm({ accounts, checklistItems, activeChallenge, tradeId, initialValues, defaultType }: Props) {
@@ -167,7 +167,7 @@ export function TradeForm({ accounts, checklistItems, activeChallenge, tradeId, 
       <div className="space-y-2">
         <Label>Currency</Label>
         <div className="flex gap-2">
-          {(['NAS100', 'Gold'] as Currency[]).map((c) => (
+          {(['NAS100', 'Gold', 'US30'] as Currency[]).map((c) => (
             <button
               key={c}
               type="button"

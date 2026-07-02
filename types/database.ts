@@ -1,4 +1,4 @@
-export type Currency = 'NAS100' | 'Gold'
+export type Currency = 'NAS100' | 'Gold' | 'US30'
 export type ChallengeStatus = 'active' | 'cancelled'
 
 export interface ChecklistItem {
@@ -56,6 +56,11 @@ export interface AccountWithPnL extends Account {
 
 export interface ChallengeWithTrades extends Challenge {
   trades: Pick<Trade, 'id' | 'currency' | 'win' | 'amount' | 'traded_at'>[]
+}
+
+export interface DailyPnL {
+  date: string // 'YYYY-MM-DD'
+  pnl: number
 }
 
 export interface CreateTradeInput {

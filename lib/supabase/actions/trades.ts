@@ -2,12 +2,43 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import type { TradeRow, TradeDetail, CreateTradeInput } from '@/types/database'
+import type { TradeRow, TradeDetail, CreateTradeInput, DailyPnL } from '@/types/database'
 
 function extractStoragePath(publicUrl: string): string | null {
   const marker = '/trade-images/'
   const idx = publicUrl.indexOf(marker)
   return idx !== -1 ? publicUrl.slice(idx + marker.length) : null
+}
+
+export async function getDailyPnL(): Promise<DailyPnL[]> {
+  const supabase = await createClient()
+
+  const today = new Date()
+  today.setHours(23, 59, 59, 999)
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+  sevenDaysAgo.setHours(0, 0, 0, 0)
+
+  const { data } = await supabase
+    .from('trades')
+    .select('amount, traded_at')
+    .is('challenge_id', null)
+    .gte('traded_at', sevenDaysAgo.toISOString())
+    .lte('traded_at', today.toISOString())
+
+  const days: DailyPnL[] = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (6 - i))
+    return { date: d.toISOString().split('T')[0], pnl: 0 }
+  })
+
+  for (const trade of data ?? []) {
+    const date = (trade.traded_at as string).split('T')[0]
+    const slot = days.find((d) => d.date === date)
+    if (slot) slot.pnl += trade.amount
+  }
+
+  return days
 }
 
 export async function getTrades(type: 'normal' | 'challenge' = 'normal', limit?: number): Promise<TradeRow[]> {

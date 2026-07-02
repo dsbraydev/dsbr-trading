@@ -1,7 +1,7 @@
 import { getAccountsWithPnL } from '@/lib/supabase/actions/accounts'
 import { getActiveChallenge } from '@/lib/supabase/actions/challenge'
 import { getChecklistItems } from '@/lib/supabase/actions/checklist'
-import { getTrades } from '@/lib/supabase/actions/trades'
+import { getTrades, getDailyPnL } from '@/lib/supabase/actions/trades'
 import { getLevelForBalance, CHALLENGE_LEVELS, CHALLENGE_START_BALANCE } from '@/lib/challenge-levels'
 import { AccountsChart } from '@/components/charts/accounts-chart'
 import { ChallengeChart } from '@/components/charts/challenge-chart'
@@ -16,11 +16,12 @@ function fmtSigned(n: number) {
 }
 
 export default async function DashboardPage() {
-  const [accounts, challenge, checklistItems, propTrades] = await Promise.all([
+  const [accounts, challenge, checklistItems, propTrades, dailyPnl] = await Promise.all([
     getAccountsWithPnL(),
     getActiveChallenge(),
     getChecklistItems(),
     getTrades(),
+    getDailyPnL(),
   ])
 
   // Accounts stats
@@ -106,7 +107,7 @@ export default async function DashboardPage() {
               View all →
             </Link>
           </div>
-          <AccountsChart accounts={accounts} />
+          <AccountsChart dailyPnl={dailyPnl} />
           {top3Accounts.length > 0 && (
             <div className="mt-4 space-y-1.5">
               {top3Accounts.map((a, i) => {
@@ -214,7 +215,7 @@ export default async function DashboardPage() {
             <ul className="space-y-1.5">
               {checklistItems.map((item, i) => (
                 <li key={item.id} className="flex items-center gap-2 text-sm">
-                  <span className="size-4 rounded border border-border shrink-0" />
+                  <span className="size-1.5 rounded-full bg-muted-foreground shrink-0" />
                   {item.name}
                 </li>
               ))}
